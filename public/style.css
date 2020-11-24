@@ -1,0 +1,11 @@
+#whiteboard {
+    display: block;
+    margin: auto;
+    width: auto;
+    position : absolute;
+    border: 3px solid green;
+}
+
+.test {
+    text-align: center;
+}
