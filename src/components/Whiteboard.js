@@ -17,7 +17,10 @@ const sketch = ( s ) =>
         let lastGuess = "";
         const backgroundColor = s.color(200, 200, 180);
         const networkInputSize = 45;
-        const considerDeltaTime = 3000;
+        const considerDeltaTime = 700;
+
+        const changeThresholdTime = 1000;
+        let lastDrawnTime = Date.now();
 
         let allLines = [];
         let allSymbols = [];
@@ -52,6 +55,15 @@ const sketch = ( s ) =>
             s.noFill();
             //redraw all the lines
             allLines.forEach(line => {
+                if (line.timeFinished != null && Math.abs(lastDrawnTime-Date.now()) >= changeThresholdTime)
+                {
+                    let nearbyPaths = getPossiblePaths(line);                  
+                    let featuresToCheck = []
+                    nearbyPaths.forEach(path => {
+                        featuresToCheck.push([getStrokeArray(path), path]);
+                    });
+                    getMostLikely(featuresToCheck);
+                }
                 if (line.text == null)
                 {
                     s.beginShape();
@@ -84,19 +96,18 @@ const sketch = ( s ) =>
         {
             let borderInfo = getBorder([currentLine.path]);
             currentLine.timeFinished = Date.now();
+            lastDrawnTime = Date.now();
             currentLine.border = borderInfo;       
         }
 
         s.keyTyped = () =>
         {
             //convert Last Written number into text C
-            if (s.keyCode === 67 && currentLine.path.length !== 0)
+            if (s.keyCode === 67 && currentLine.timeFinished != null)
             {
-                let nearbyPaths = getPossiblePaths(currentLine); 
-                console.log(nearbyPaths);               
+                let nearbyPaths = getPossiblePaths(currentLine);                
                 let featuresToCheck = []
                 nearbyPaths.forEach(path => {
-                    console.log(getStrokeArray(path).join(""));
                     featuresToCheck.push([getStrokeArray(path), path]);
                 });
                 getMostLikely(featuresToCheck);
@@ -127,18 +138,28 @@ const sketch = ( s ) =>
                 probabilityOfSymbols.push({
                     probValue : max,
                     label : catergories[prediction.indexOf(max)],
-                    lines : potentialSymbol[1]
+                    paths : potentialSymbol[1]
                 });
             });
             let symbol = probabilityOfSymbols[probabilityOfSymbols.length-1]; //TODO:change to the value with highest probability
-            let symbolBorder = getBorder(symbol.lines);            
+            let symbolBorder = getBorder(symbol.paths);            
             allSymbols.push({
                 text : symbol.label,
                 border : symbolBorder,
                 textSize : symbolBorder.maxWidth
             });
-            //remove the lines that got converted
-            symbol.lines.forEach(line => {
+            //remove the path that got converted
+            let LinesToRemove = []
+            allLines.forEach(line => {
+                symbol.paths.forEach(path => {
+                    if (line.path === path)
+                    {
+                        LinesToRemove.push(line);
+                    }
+                });
+            });
+
+            LinesToRemove.forEach(line => {
                 allLines.splice(allLines.indexOf(line), 1);
             });
         }
@@ -158,16 +179,14 @@ const sketch = ( s ) =>
             possiblePaths.push([...nearbyPaths]);
             allLines.forEach(line => {
                 if (line !== mainLine)
-                {                  
+                {                                   
                     //look for any nearby lines
-                    if (line.border.topLeft.x + line.border.maxWidth > borderInfo.topLeft.x && line.border.topLeft.x < borderInfo.topLeft.x + borderInfo.maxWidth)
-                    {
-                        if (line.border.topLeft.y + line.border.maxWidth > borderInfo.topLeft.y && line.border.topLeft.y < borderInfo.topLeft.y + borderInfo.maxWidth)
-                        {    
-                            nearbyPaths.push(line.path);
-                            possiblePaths.push([...nearbyPaths]);
-                            borderInfo = getBorder(nearbyPaths);
-                        }
+                    if (line.border.topLeft.x + line.border.maxWidth > borderInfo.topLeft.x && line.border.topLeft.x < borderInfo.topLeft.x + borderInfo.maxWidth &&
+                        line.border.topLeft.y + line.border.maxWidth > borderInfo.topLeft.y && line.border.topLeft.y < borderInfo.topLeft.y + borderInfo.maxWidth)
+                    { 
+                        nearbyPaths.push(line.path);
+                        possiblePaths.push([...nearbyPaths]);
+                        borderInfo = getBorder(nearbyPaths);
                     }
                     //look for lines that were drawn within considerDeltaTime of the main line
                     else if (Math.abs(mainLine.timeFinished-line.timeFinished) <= considerDeltaTime)                
@@ -181,7 +200,7 @@ const sketch = ( s ) =>
             return possiblePaths;
         }
 
-        //takes in an array of lines, and returns the border information that surrounds the lines
+        //takes in an array of path, and returns the border information that surrounds the path
         function getBorder(paths)
         {
             let topLeft = s.createVector(s.width,s.height)
@@ -215,7 +234,7 @@ const sketch = ( s ) =>
             };
         }
 
-        //takes in the array of lines, and the border surrounding it, and returns an array of 1 and 0 to parse into model
+        //takes in the array of path, and the border surrounding it, and returns an array of 1 and 0 to parse into model
         function getStrokeArray(paths, border = getBorder(paths))
         {               
             //remap all the points onto the resized array, of which the dimensions are networkInputSize
