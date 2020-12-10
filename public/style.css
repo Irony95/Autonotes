@@ -1,11 +1,56 @@
+html {
+    background-color: #222222;
+}
+
 #whiteboard {
-    display: block;
-    margin: auto;
-    width: auto;
-    position : absolute;
-    border: 3px solid green;
+    width: 100%;
+    border: 5px ridge #313131;
 }
 
 .test {
     text-align: center;
+}
+
+#infoSpace {
+    height : 90vh; 
+    width: 100%;
+    background-color: rgb(230, 230, 241);
+    border: 5px solid #313131;
+}
+#infoSpace > h1 {    
+    border-bottom: 5px solid #313131;
+    padding-left: 20px;
+}
+
+#infoSpace > p {
+    padding: 20px;
+    padding-top: 0;
+    font-size: 20px;
+}
+
+#infoSpace > h2 {
+    padding-left: 20px;
+}
+#drawingApp {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+#sidebar {
+    background-color: #7F7F7F; 
+    width: auto;
+    height: auto;
+    padding-right: 10px;
+    border: 5px solid #313131;
+}
+
+#sidebar ul {    
+    margin-top: 0;
+    padding: 5px ;
+    list-style-type: none;
+}
+
+#sidebar ul li {
+    padding: 5px 0;
 }
