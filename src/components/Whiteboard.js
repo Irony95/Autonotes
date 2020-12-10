@@ -307,6 +307,7 @@ const sketch = ( s ) =>
                 }
             });     
             
+            //all this is done so that the text is as close as possible to the drawn symbol
             let bounds = mathFont.textBounds(textToUse, symbolBorder.topLeft.x, symbolBorder.bottomRight.y, symbolBorder.maxWidth);
             let newSize = bounds.w > bounds.h ? symbolBorder.maxWidth * (symbolBorder.maxWidth/bounds.w) : symbolBorder.maxWidth * (symbolBorder.maxWidth/bounds.h);            
             let newBounds = mathFont.textBounds(textToUse, symbolBorder.topLeft.x, symbolBorder.bottomRight.y, newSize);
