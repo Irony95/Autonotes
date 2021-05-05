@@ -436,18 +436,18 @@ const sketch = ( s ) =>
 
         //takes in the array of path, and the border surrounding it, and returns an array of 1 and 0 to parse into model
         //also note, this function was created when i was still using a 1D array as the features, so it returns a 1D array, instead of the 3D array
-        //the model uses
+        //it gets resized by the tensorflow function though so ehhh couldnt be bothered to rewrite it 
         function getStrokeArray(paths, border = getBorder(paths))
         {               
             //remap all the points onto the resized array, of which the dimensions are networkInputSize
             let scale = (networkInputSize-1)/border.maxWidth;
-            let resizedArray = new Array(networkInputSize**2).fill(0);            
+            let resizedArray = new Array(networkInputSize**2).fill(0);
             paths.forEach(path => {                
                 let resizedLines = []
                 path.forEach(point => {
                     let loc = s.createVector(Math.round((point.x-border.topLeft.x)*scale ), Math.round((point.y-border.topLeft.y)*scale ));  
                     resizedLines.push(loc);                
-                });         
+                });
                 //loop through all the points, and connect them together
                 for (let i = 0;i < resizedLines.length;i++)
                 {
