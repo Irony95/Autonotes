@@ -1,4 +1,4 @@
-import React from "react";
+    import React from "react";
 import p5 from "p5";
 import * as tf from '@tensorflow/tfjs';
 
@@ -131,6 +131,7 @@ const sketch = ( s ) =>
             s.background(backgroundColor);
         };
         
+        //The constant loop on screen
         s.draw = () => {
             //clear the background
             s.background(backgroundColor);
@@ -242,7 +243,7 @@ const sketch = ( s ) =>
             }
         }
 
-        //takes in an array of features, paths, and will check through all and converts the most likely 
+        //takes in an array of features, paths, and will check through all and converts to the most likely  symbol
         async function matchWithSymbol(paths)
         {
             let probabilityOfSymbols = []
@@ -452,31 +453,19 @@ const sketch = ( s ) =>
                 {
                     if (i !== path.length-1)
                     {                    
-                        let repeatTimes = Math.ceil( Math.sqrt( (path[i].x-path[i+1].x)**2 + (path[i].y-path[i+1].y)**2 ) );
-    
-                        //if the line is vertical, a graident is not possible
-                        //therefore, we use a different function to fill in the points
-                        if (Math.abs(resizedLines[i].x-resizedLines[i+1].x) === 0)                    
-                        {
-                            for (let j = 0;j<Math.abs(resizedLines[i].y-resizedLines[i+1].y);j++)
-                            {
-                                let indexToChange = resizedLines[i].x + networkInputSize*(resizedLines[i].y - j*Math.sign(resizedLines[i].y-resizedLines[i+1].y));//
-                                resizedArray[indexToChange] = 1
-                            }
-                        }
-                        //calculate gradient, then fill in the line inbetween two points
-                        else
-                        {
-                            let gradient = (resizedLines[i].y-resizedLines[i+1].y)/(Math.abs(resizedLines[i].x-resizedLines[i+1].x));
-                            let direction = Math.sign(resizedLines[i].x-resizedLines[i+1].x);
-                            
-                            for (let j = 0;j < repeatTimes;j++)
-                            {   
-                                let xCoord = s.map(j, 0, repeatTimes, 0, Math.abs(resizedLines[i].x-resizedLines[i+1].x));
-                                let indexToChange = resizedLines[i].x-(direction*Math.round(xCoord)) + networkInputSize*Math.round((resizedLines[i].y-gradient*xCoord));
-                                resizedArray[indexToChange] = 1
-                            }
-                        }                    
+                        let repeatTimes = Math.ceil( Math.sqrt( (path[i].x-path[i+1].x)**2 + (path[i].y-path[i+1].y)**2 ) );                        
+                        let gradient = Math.abs( Math.atan( (resizedLines[i].y-resizedLines[i+1].y)/(resizedLines[i].x-resizedLines[i+1].x) ) );
+                        if (gradient > Math.PI) { gradient = 2*Math.PI - gradient; }
+                        let xDir = Math.sign(resizedLines[i].x-resizedLines[i+1].x);
+                        let yDir = Math.sign(resizedLines[i].y-resizedLines[i+1].y);
+                        
+                        for (let j = 0;j < repeatTimes;j++)
+                        {                               
+                            let yRise = Math.sin(gradient)*i;
+                            let xRun = Math.cos(gradient)*i;
+                            let indexToChange = Math.round(resizedLines[i].x-xRun*xDir + networkInputSize*resizedLines[i].y+yRise*yDir);
+                            resizedArray[indexToChange] = 1
+                        }                  
                     }
                     resizedArray[Math.round(resizedLines[i].x + networkInputSize*resizedLines[i].y)] = 1
                 }
