@@ -2,7 +2,7 @@
   "name": "auto-notes",
   "version": "0.1.0",
   "private": true,
-
+  "proxy" : "localhost:3000/",
   "dependencies": {
     "@tensorflow/tfjs": "^2.7.0",
     "@testing-library/jest-dom": "^5.11.5",
