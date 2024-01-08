@@ -1,6 +1,6 @@
 This app was created with React and the drawing part was mainly in p5js.
-I dont really have professional experience coding and so the code written might be a bit unorthodox.
-And also some functions I was too lazy to deal with lol.
+The entire project was hastily written, so many of the code is not well written. 
+Do not use this as an example of how to write good code!
 
 
 
